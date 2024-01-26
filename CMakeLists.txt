@@ -26,7 +26,6 @@ endif()
 include(GNUInstallDirs)
 add_definitions(-D_UNICODE=1)
 
-include(cmake/ConfigureChecks.cmake)
 include(cmake/gettext.cmake)
 
 # Set up PCRE2
