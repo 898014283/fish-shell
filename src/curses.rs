@@ -191,8 +191,6 @@ pub struct Term {
     pub key_suspend: Option<CString>,
     pub key_undo: Option<CString>,
     pub key_up: Option<CString>,
-
-    pub database: terminfo::Database,
 }
 
 impl Term {
@@ -349,7 +347,6 @@ impl Term {
             key_suspend: get_str_cap(&db, "&7"),
             key_undo: get_str_cap(&db, "&8"),
             key_up: get_str_cap(&db, "ku"),
-            database: db,
         }
     }
 }
