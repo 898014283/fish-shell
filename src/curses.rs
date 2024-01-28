@@ -397,15 +397,6 @@ where
     }
 }
 
-/// Resets the curses `cur_term` TERMINAL pointer. Subsequent calls to [`curses::term()`](term())
-/// will return `None`.
-pub fn reset() {
-    let mut term = TERM.lock().expect("Mutex poisoned!");
-    if term.is_some() {
-        *term = None;
-    }
-}
-
 /// Return a nonempty String capability from termcap, or None if missing or empty.
 /// Panics if the given code string does not contain exactly two bytes.
 fn get_str_cap(db: &terminfo::Database, code: &str) -> Option<CString> {
