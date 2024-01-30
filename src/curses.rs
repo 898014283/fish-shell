@@ -41,7 +41,7 @@ pub fn term() -> Option<Arc<Term>> {
 ///
 /// An extant `Term` instance means the curses `TERMINAL *cur_term` pointer is non-null. Any
 /// functionality that is normally performed using `cur_term` should be done via `Term` instead.
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct Term {
     // String capabilities. Any Some value is confirmed non-empty.
     pub enter_bold_mode: Option<CString>,
@@ -395,8 +395,7 @@ where
     }
 }
 
-pub fn setup_fallback_term() -> Arc<Term> {
-    let mut global_term = TERM.lock().expect("Mutex poisoned!");
+fn fallback_term() -> Term {
     // These values extracted from xterm-256color from ncurses 6.4
     let term = Term {
         enter_bold_mode: Some(CString::new("\x1b[1m").unwrap()),
@@ -463,7 +462,12 @@ pub fn setup_fallback_term() -> Arc<Term> {
         key_up: Some(CString::new("\x1bOA").unwrap()),
         ..Default::default()
     };
-    let term = Arc::new(term);
+    term
+}
+
+pub fn setup_fallback_term() -> Arc<Term> {
+    let mut global_term = TERM.lock().expect("Mutex poisoned!");
+    let term = Arc::new(fallback_term());
     *global_term = Some(term.clone());
     term
 }
@@ -507,4 +511,13 @@ pub fn tparm1(cap: &CStr, param1: i32) -> Option<CString> {
     assert!(!cap.to_bytes().is_empty());
     let cap = cap.to_bytes();
     terminfo::expand!(cap; param1).ok().map(|x| x.to_cstring())
+}
+
+#[test]
+fn test_xterm_matches() {
+    let ours = fallback_term();
+    let theirs = terminfo::Database::from_name("xterm-256color");
+    if let Ok(theirs) = theirs {
+        assert_eq!(ours, Term::new(theirs));
+    };
 }
